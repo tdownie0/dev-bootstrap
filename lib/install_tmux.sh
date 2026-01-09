@@ -2,6 +2,11 @@
 set -euo pipefail
 
 install_tmux() {
+  if command_exists tmux; then
+    log "tmux is already installed"
+    return
+  fi
+
   log "Installing tmux..."
 
   case "$OS" in

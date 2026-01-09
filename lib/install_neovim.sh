@@ -54,5 +54,10 @@ install_nvim_config() {
   fi
 }
 
+if command_exists nvim; then
+  log "neovim is already installed"
+  return
+fi
+
 install_neovim
 install_nvim_config
