@@ -18,6 +18,8 @@ source $ZSH/oh-my-zsh.sh
 
 [ -f ~/.shell_env ] && source ~/.shell_env
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 typeset -U path
 
 path=(

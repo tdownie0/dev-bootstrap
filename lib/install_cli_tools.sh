@@ -16,6 +16,7 @@ install_fzf() {
   ln -sf "$local_share/fzf/bin/fzf" "$local_bin/fzf"
   ln -sf "$local_share/fzf/bin/fzf-preview.sh" "$local_bin/fzf-preview.sh"
   ln -sf "$local_share/fzf/bin/fzf-tmux" "$local_bin/fzf-tmux"
+  ln -sf "$local_share/fzf/shell/key-bindings.zsh" "$HOME/.fzf.zsh"
 }
 
 install_eza() {
