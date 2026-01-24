@@ -62,26 +62,45 @@ install_curlie() {
 }
 
 install_posting() {
-  if ! $FORCE_INSTALL && command_exists posting; then
+  if ! $FORCE_INSTALL && command -v posting >/dev/null 2>&1; then
     log "posting already installed"
     return
   fi
 
-  log "Installing pipx and posting"
+  log "Installing Python prerequisites and posting"
+
+  # Ensure local bin is in the path for the current shell session
+  [[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
+
   case "$OS" in
     linux)
       sudo apt update
-      sudo apt install -y --reinstall python3-pip python3-venv pipx
+      sudo apt install -y software-properties-common python3-pip python3-venv
+
+      if ! command -v python3.12 >/dev/null 2>&1; then
+        log "Python 3.12 not found, adding deadsnakes PPA..."
+
+        sudo add-apt-repository -y ppa:deadsnakes/ppa
+        sudo apt update
+        sudo apt install -y python3.12 python3.12-venv python3.12-dev
+      fi
+      TARGET_PYTHON="python3.12"
       ;;
+
     macos)
-      brew install pipx
+      log "Ensuring Python 3.12 and pipx via Homebrew"
+      brew install python@3.12 pipx
+      # Dynamically find the Homebrew Python path (works for Intel and M-series)
+      TARGET_PYTHON=$(brew --prefix python@3.12)/bin/python3.12
       ;;
   esac
 
+  log "Installing posting using $TARGET_PYTHON..."
+
   if $FORCE_INSTALL; then
-    pipx reinstall posting || pipx install --force posting
+    pipx install --python "$TARGET_PYTHON" --force posting || pipx reinstall posting
   else
-    pipx install posting
+    pipx install --python "$TARGET_PYTHON" posting || log "Posting might already be installed."
   fi
 }
 
