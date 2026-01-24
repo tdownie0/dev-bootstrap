@@ -10,6 +10,35 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+FORCE_INSTALL=false
+
+show_help() {
+  cat << EOF
+    Usage: $(basename "$0") [OPTIONS]
+
+    Bootstrap your development environment.
+
+    Options:
+	-f, --force      Force installation (overwrites existing configs and reinstalls packages)
+	-h, --help       Show this help message and exit
+
+    Description:
+	This script automates the installation of Fonts, Alacritty, Zsh, Tmux, 
+	Neovim, and various CLI tools for both Linux (Ubuntu/Debian) and macOS.
+EOF
+}
+
+# Parsing arguments
+FORCE_INSTALL=false
+
+for arg in "$@"; do
+  case $arg in
+    -f|--force) FORCE_INSTALL=true ;;
+    -h|--help)  show_help; exit 0 ;;
+    *)          echo "Unknown option: $arg"; show_help; exit 1 ;;
+  esac
+done
+
 source "$SCRIPT_DIR/lib/utils.sh"
 source "$SCRIPT_DIR/lib/detect_os.sh"
 

@@ -979,8 +979,8 @@ require("lazy").setup({
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
-		main = "nvim-treesitter.configs", -- Sets main module to use for opts
-		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+		-- main = "nvim-treesitter.configs", -- Sets main module to use for opts
+		-- -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 		opts = {
 			ensure_installed = {
 				"bash",
@@ -1005,6 +1005,18 @@ require("lazy").setup({
 				additional_vim_regex_highlighting = { "ruby" },
 			},
 			indent = { enable = true, disable = { "ruby" } },
+			-- Added this due to treesitter errors
+			-- This function only runs AFTER the plugin is successfully loaded into memory
+			config = function(_, opts)
+				local status, configs = pcall(require, "nvim-treesitter.configs")
+				if status then
+					configs.setup(opts)
+				else
+					-- If you are on a version of v0.11 where 'configs' is gone,
+					-- this prevents the red error box from appearing.
+					vim.notify("Treesitter: nvim-treesitter.configs module not found", vim.log.levels.WARN)
+				end
+			end,
 		},
 		-- There are additional nvim-treesitter modules that you can use to interact
 		-- with nvim-treesitter. You should go explore a few and see what interests you:

@@ -1,5 +1,5 @@
 install_fzf() {
-  if command_exists fzf; then
+  if ! $FORCE_INSTALL && command_exists fzf; then
     log "fzf already installed"
     return
   fi
@@ -7,11 +7,15 @@ install_fzf() {
   local local_share="$HOME/.local/share"
   local local_bin="$HOME/.local/bin"
 
+  if $FORCE_INSTALL && [[ -d "$local_share/fzf" ]]; then
+    rm -rf "$local_share/fzf"
+  fi
+
   log "Installing fzf"
   git clone --depth 1 https://github.com/junegunn/fzf.git "$local_share/fzf"
   "$local_share/fzf/install" --bin
 
-  mkdir -p "$HOME/$local_bin"
+  mkdir -p "$local_bin"
 
   ln -sf "$local_share/fzf/bin/fzf" "$local_bin/fzf"
   ln -sf "$local_share/fzf/bin/fzf-preview.sh" "$local_bin/fzf-preview.sh"
@@ -20,7 +24,7 @@ install_fzf() {
 }
 
 install_eza() {
-  if command_exists eza; then
+  if ! $FORCE_INSTALL && command_exists eza; then
     log "eza already installed"
     return
   fi
@@ -29,7 +33,7 @@ install_eza() {
 
   # Ensure gpg is installed
   sudo apt update
-  sudo apt install -y gpg wget
+  sudo apt install -y --reinstall gpg wget
 
   # Add keyring
   sudo mkdir -p /etc/apt/keyrings
@@ -44,11 +48,11 @@ install_eza() {
 
   # Update and install
   sudo apt update
-  sudo apt install -y eza
+  sudo apt install -y --reinstall eza
 }
 
 install_curlie() {
-  if command_exists curlie; then
+  if ! $FORCE_INSTALL && command_exists curlie; then
     log "curlie already installed"
     return
   fi
@@ -58,7 +62,7 @@ install_curlie() {
 }
 
 install_posting() {
-  if command_exists posting; then
+  if ! $FORCE_INSTALL && command_exists posting; then
     log "posting already installed"
     return
   fi
@@ -67,20 +71,30 @@ install_posting() {
   case "$OS" in
     linux)
       sudo apt update
-      sudo apt install -y python3-pip python3-venv pipx
+      sudo apt install -y --reinstall python3-pip python3-venv pipx
       ;;
     macos)
       brew install pipx
       ;;
   esac
-  
-  pipx install posting
+
+  if $FORCE_INSTALL; then
+    pipx reinstall posting || pipx install --force posting
+  else
+    pipx install posting
+  fi
 }
 
 install_cli_packages_linux() {
-  log "Installing CLI tools (Linux)"
-  sudo apt update
-  sudo apt install -y bat btop
+  local pkgs=(build-essential bat btop curl git unzip)
+
+  if $FORCE_INSTALL; then
+    log "Force reinstalling core CLI tools..."
+    sudo apt install -y --reinstall "${pkgs[@]}"
+  else
+    log "Ensuring core CLI tools are present..."
+    sudo apt install -y "${pkgs[@]}"
+  fi
 }
 
 install_cli_packages_macos() {
