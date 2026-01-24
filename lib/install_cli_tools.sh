@@ -38,7 +38,7 @@ install_eza() {
   # Add keyring
   sudo mkdir -p /etc/apt/keyrings
   wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | \
-    sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/gierens.gpg
 
   # Add repo
   echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | \
@@ -98,9 +98,11 @@ install_posting() {
   log "Installing posting using $TARGET_PYTHON..."
 
   if $FORCE_INSTALL; then
-    pipx install --python "$TARGET_PYTHON" --force posting || pipx reinstall posting
+    pipx uninstall posting >/dev/null 2>&1
+    pipx install --python "$TARGET_PYTHON" posting
   else
-    pipx install --python "$TARGET_PYTHON" posting || log "Posting might already be installed."
+    pipx install --python "$TARGET_PYTHON" posting || \
+    pipx reinstall --python "$TARGET_PYTHON" posting
   fi
 }
 
